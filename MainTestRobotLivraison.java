@@ -1,7 +1,8 @@
-import java.awt.*;
-import java.awt.event.*;
+
 import java.util.List;
+import java.awt.*;
 import javax.swing.*;
+import java.awt.event.*;
 
 public class MainTestRobotLivraison {
     public static void main(String[] args) {
@@ -22,7 +23,7 @@ public class MainTestRobotLivraison {
 
             // Étape 2 : Créer le robot
             RobotLivraison robot = new RobotLivraison("EcoBot1", 0, 0);
-            //graph
+//graph
             JFrame frame = new JFrame("Control Panel");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
             frame.setSize(1200, 700);
@@ -192,6 +193,8 @@ public class MainTestRobotLivraison {
             
             robot.setDestination(ville);
             robot.FaireLivraison(x, y);
+            
+            }
             connect.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -210,11 +213,7 @@ public class MainTestRobotLivraison {
                         output.setText("Robot déconnecté au réseau : reseau1\n"); 
                 }
             });
-            
-
-            
-            
-        }} catch (RobotException e) {
+        } catch (RobotException e) {
             System.err.println("Erreur Robot : " + e.getMessage());
         }
-    }};
+    }}
