@@ -1,8 +1,8 @@
 
-import java.util.List;
 import java.awt.*;
-import javax.swing.*;
 import java.awt.event.*;
+import java.util.List;
+import javax.swing.*;
 
 public class MainTestRobotLivraison {
     public static void main(String[] args) {
@@ -176,6 +176,25 @@ public class MainTestRobotLivraison {
 
                 }
             });
+            connect.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        robot.connecter("reseau1");
+                        output.setText("Robot connecté au réseau : reseau1\n");
+                        System.out.println("Connect button clicked");
+                    } catch (RobotException ex) {
+                        output.setText("Erreur de connexion : " + ex.getMessage() + "\n");
+                    }
+                }
+            });
+            disconnect.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                        robot.deconnecter();
+                        output.append("Robot déconnecté au réseau : reseau1\n"); 
+                }
+            });
             bottomButtons.add(history);
             bottomButtons.add(battery);
             bottomButtons.add(searchButton);
@@ -195,24 +214,7 @@ public class MainTestRobotLivraison {
             robot.FaireLivraison(x, y);
             
             }
-            connect.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        robot.connecter("reseau1");
-                        output.setText("Robot connecté au réseau : reseau1\n");
-                    } catch (RobotException ex) {
-                        output.setText("Erreur de connexion : " + ex.getMessage() + "\n");
-                    }
-                }
-            });
-            disconnect.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                        robot.deconnecter();
-                        output.setText("Robot déconnecté au réseau : reseau1\n"); 
-                }
-            });
+            
         } catch (RobotException e) {
             System.err.println("Erreur Robot : " + e.getMessage());
         }
