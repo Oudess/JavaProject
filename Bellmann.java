@@ -23,7 +23,7 @@ public class Bellmann {
         }
     }
 
-    List<String> chemin = new ArrayList<>();
+    List<String> chemin = new ArrayList<String>();
     String courant = destination;
     while (courant != null) {
         chemin.add(0, courant); // ajoute en tête pour inverser

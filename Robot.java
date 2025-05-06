@@ -64,7 +64,7 @@ public abstract class Robot {
         this.ajouterHistorique("Energie conseommé: "+quantity+" %");
         this.energie-=quantity;}
     }
-    public void recharcher(int quantity){
+    public void recharger(int quantity){
         if (this.energie+quantity<=100){
             this.ajouterHistorique("Energie rechargé: "+quantity+" %");
             this.energie+=quantity;
