@@ -15,12 +15,12 @@ public class MainTestRobotLivraison {
             // Étape 1 : Créer le réseau
             Réseau reseau = new Réseau();
             reseau.add_line("New York", "Tokyo", 4.8);
-        reseau.add_line("New York", "Manilla", 2);
-        reseau.add_line("Tokyo", "Paris", 10.12);
-        reseau.add_line("Tokyo", "Manilla", 5);
-        reseau.add_line("Manilla", "Cairo", 3.58);
-        reseau.add_line("Cairo", "Paris", 4);
-        reseau.add_line("Paris", "Tunis", 11);
+            reseau.add_line("New York", "Manilla", 2);
+            reseau.add_line("Tokyo", "Paris", 10.12);
+            reseau.add_line("Tokyo", "Manilla", 5);
+            reseau.add_line("Manilla", "Cairo", 3.58);
+            reseau.add_line("Cairo", "Paris", 4);
+            reseau.add_line("Paris", "Tunis", 11);
             Map<String, Point> cityPositions = new HashMap<>();
             cityPositions.put("New York", new Point(25, 260));
             cityPositions.put("Tokyo", new Point(175, 160));
@@ -33,7 +33,7 @@ public class MainTestRobotLivraison {
 
             // Étape 2 : Créer le robot
             RobotLivraison robot = new RobotLivraison("EcoBot1", 0, 0);
-//graph
+            //graph
             JFrame frame = new JFrame("Control Panel");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
             frame.setSize(1200, 700);
@@ -56,7 +56,7 @@ public class MainTestRobotLivraison {
             PositionArea.setEditable(false);
             
      
-            ImageIcon icon = new ImageIcon("icon.jpg");
+            ImageIcon icon = new ImageIcon("icon.png");
             frame.setIconImage(icon.getImage());
             
             Screen screen = new Screen();
@@ -147,7 +147,7 @@ public class MainTestRobotLivraison {
                                             
                                         });
                         
-                                        TimeUnit.SECONDS.sleep(2); // Wait before moving to next city
+                                        TimeUnit.SECONDS.sleep(1); // Wait before moving to next city
                                     }
                                 }
                                 pkgArea.setText( "Dropped!");
@@ -368,7 +368,7 @@ public class MainTestRobotLivraison {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if(robot.getEtat())
-                        Desktop.getDesktop().browse(URI.create("file:///C:/Users/MSI/Desktop/project/JavaProject.html"));
+                        Desktop.getDesktop().browse(URI.create("file:///C:/Users/MSI/Desktop/project/Java%20Project.pdf"));
                         else{
                             output.setText("Robot is not powered up!\n");
                         }
