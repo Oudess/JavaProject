@@ -39,6 +39,21 @@ public class MainTestRobotLivraison {
             frame.setSize(1200, 700);
             frame.setLayout(new BorderLayout());
             frame.setResizable(false);
+            JPanel statusPanel = new JPanel();
+            statusPanel.setLayout(new GridLayout(2,2, 5, 5));  
+            statusPanel.setBorder(BorderFactory.createTitledBorder("Status"));
+            JTextArea pkgArea = new JTextArea(3, 5);
+            pkgArea.setBorder(BorderFactory.createTitledBorder("Package:"));
+            pkgArea.setEditable(false);
+            JTextArea delArea = new JTextArea(3, 5);
+            delArea.setBorder(BorderFactory.createTitledBorder("Delivery:"));
+            delArea.setEditable(false);
+            JTextArea BatteryArea = new JTextArea(3, 5);
+            BatteryArea.setBorder(BorderFactory.createTitledBorder("Battery:"));
+            BatteryArea.setEditable(false);
+            JTextArea PositionArea = new JTextArea(3, 5);
+            PositionArea.setBorder(BorderFactory.createTitledBorder("Position:"));
+            PositionArea.setEditable(false);
             
      
             ImageIcon icon = new ImageIcon("icon.jpg");
@@ -107,23 +122,47 @@ public class MainTestRobotLivraison {
                 public void actionPerformed(ActionEvent e) {
                     if(robot.getEtat()){
                         
-                        try {
-                            ArrayList<String> chemin=robot.effectuerTache(reseau, input.getText());
-                            output.setText("Shortest path from Tunis:"+chemin+"\n");
-                            for(String city : chemin) {
-                                Point point = cityPositions.get(city);
-                                if (point != null) {
-                                    output.setText("Moving to: " + city + "\n");
-                                    TimeUnit.SECONDS.sleep(2);
-                                    screen.setPosition(point);
+                        new Thread(() -> {
+                            try {
+                                String dest=input.getText();
+                                ArrayList<String> chemin = robot.effectuerTache(reseau, dest);
+                                screen.setVisible(true);
+                                pkgArea.setText( robot.getColisActuel());
+                                delArea.setText( robot.getDelivery());
+                                SwingUtilities.invokeLater(() ->{
+                                    output.setText("Shortest path from Tunis: " + chemin + "\n");
                                     
-                                } else {
-                                    output.setText("City not found: " + city + "\n");
-                                }
                             }
-                        } catch (Exception ex) {
-                            output.setText("Erreur de livraison : " + ex.getMessage() + "\n");
-                        }
+                                );
+                                TimeUnit.SECONDS.sleep(2);
+                                for (String city : chemin) {
+                                    Point point = cityPositions.get(city);
+                                    if (point != null) {
+                                        // Update text and robot position on the Swing thread
+                                        SwingUtilities.invokeLater(() -> {
+                                            output.setText("Currently in: " + city + "\n");
+                                            screen.setPosition(point);
+                                            BatteryArea.setText(robot.energie+"%");
+                                            PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
+                                            
+                                        });
+                        
+                                        TimeUnit.SECONDS.sleep(2); // Wait before moving to next city
+                                    }
+                                }
+                                pkgArea.setText( "Dropped!");
+                                delArea.setText( "Delivered!");
+                                output.setText("Delivery completed! in: "+ dest+ "\n");
+                                robot.setDelivery(false);
+                                robot.setColisActuel(0);
+                                screen.setVisible(false);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                SwingUtilities.invokeLater(() ->
+                                    output.setText("Erreur: " + ex.getMessage())
+                                );
+                            }
+                        }).start();
                     }else{
                         output.setText("Robot is not powered up!\n");
                     }
@@ -187,21 +226,7 @@ public class MainTestRobotLivraison {
                 }
             });
     
-            JPanel statusPanel = new JPanel();
-            statusPanel.setLayout(new GridLayout(2,2, 5, 5));  
-            statusPanel.setBorder(BorderFactory.createTitledBorder("Status"));
-            JTextArea pkgArea = new JTextArea(3, 5);
-            pkgArea.setBorder(BorderFactory.createTitledBorder("Package:"));
-            pkgArea.setEditable(false);
-            JTextArea delArea = new JTextArea(3, 5);
-            delArea.setBorder(BorderFactory.createTitledBorder("Delivery:"));
-            delArea.setEditable(false);
-            JTextArea BatteryArea = new JTextArea(3, 5);
-            BatteryArea.setBorder(BorderFactory.createTitledBorder("Battery:"));
-            BatteryArea.setEditable(false);
-            JTextArea PositionArea = new JTextArea(3, 5);
-            PositionArea.setBorder(BorderFactory.createTitledBorder("Position:"));
-            PositionArea.setEditable(false);
+            
             statusPanel.add(pkgArea);
             statusPanel.add(delArea);
             statusPanel.add(BatteryArea);
@@ -299,6 +324,8 @@ public class MainTestRobotLivraison {
                         robot.setDestination("Tunis");
                         PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
                         BatteryArea.setText(robot.energie+"%");
+                        delArea.setText( robot.getDelivery());
+                        pkgArea.setText( robot.getColisActuel());
                         robot.deplacer(625, 260);}
                         else{
                             output.setText("Robot is not powered up!\n");
@@ -366,7 +393,9 @@ public class MainTestRobotLivraison {
                         output.setText("Robot démarré\n");
                         
                     }
+                    BatteryArea.setText(robot.energie+"%");
                     screen.powerUP();
+                    PositionArea.setText("Position: (625, 260)");
                     }catch(RobotException er){
                         output.setText("");
                         output.setText("Erreur de démarrage : " + er.getMessage() + "\n");
@@ -380,9 +409,10 @@ public class MainTestRobotLivraison {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if(robot.getEtat()){
-                        robot.connecter("reseau1");
-                        output.setText("Robot connecté au réseau : reseau1\n");
-                        System.out.println("Connect button clicked");}
+                            String reseau=input.getText();
+                        robot.connecter(reseau);
+                        output.setText("Robot connecté au réseau : "+reseau+"\n");
+                        BatteryArea.setText(robot.energie+"%");}
                         else{
                             output.setText("Robot is not powered up!\n");
                         }
@@ -408,7 +438,6 @@ public class MainTestRobotLivraison {
                 public void actionPerformed(ActionEvent e) {
                     if(robot.getEtat()){
                         robot.ajouterHistorique("Robot en mode cœur !");
-                        
                         screen.setHeart();
                         output.setForeground(Color.RED);
                         output.setText("❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️\n");}

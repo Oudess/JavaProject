@@ -7,6 +7,7 @@ import javax.swing.*;
 class Screen extends JPanel {
     public boolean power = false; // robot power state
     public int x = -1, y = -1; // robot position
+    private boolean isVisible = false; // robot visibility state
     private boolean heart=false; // heart mode
     private Color robotColor = new Color(100, 200, 100); // eco green
 
@@ -21,37 +22,43 @@ class Screen extends JPanel {
         }else{        if (heart){
             this.setBackground(new Color(255, 192, 203)); // Pink background
             g2.setColor(Color.RED);
-if (x == -1 || y == -1) {
-    x = 100;
-    y = 100;
-}
+                if (x == -1 || y == -1) {
+                    x = 100;
+                    y = 100;
+                }       
 
-// Draw the two top lobes of the heart (ovals)
-g2.fillOval(x, y, 20, 20);       // Left lobe
-g2.fillOval(x + 20, y, 20, 20);  // Right lobe
+                // Draw the two top lobes of the heart (ovals)
+                g2.fillOval(x, y, 20, 20);       // Left lobe
+                g2.fillOval(x + 20, y, 20, 20);  // Right lobe
 
-// Draw the bottom triangle (point of the heart)
-int[] xPoints = { x, x + 20, x + 40 };
-int[] yPoints = { y + 15, y + 45, y + 15 };
-g2.fillPolygon(xPoints, yPoints, 3);
+                // Draw the bottom triangle (point of the heart)
+                int[] xPoints = { x, x + 20, x + 40 };
+                int[] yPoints = { y + 15, y + 45, y + 15 };
+                g2.fillPolygon(xPoints, yPoints, 3);
 
-// Optional: black eyes as little dots inside the heart
-g2.setColor(Color.BLACK);
-g2.fillOval(x + 6, y + 8, 4, 4);
-g2.fillOval(x + 30, y + 8, 4, 4);
+                // Optional: black eyes as little dots inside the heart
+                g2.setColor(Color.BLACK);
+                g2.fillOval(x + 6, y + 8, 4, 4);
+                g2.fillOval(x + 30, y + 8, 4, 4);
 
-// Optional: cute antenna on top
-g2.drawLine(x + 20, y, x + 20, y - 10);
-g2.fillOval(x + 17, y - 13, 6, 6);   
-        }
-          else{
-            this.setBackground(new Color(162,228,184)); // Pink background
-          g2.setColor(robotColor);
-          if (x == -1 || y == -1) {
-              x = 100; // Center the robot if not set
-              y = 100;
-          }
-          g2.fillRect(x, y, 40, 40); // robot body
+                // Optional: cute antenna on top
+                g2.drawLine(x + 20, y, x + 20, y - 10);
+                g2.fillOval(x + 17, y - 13, 6, 6);   
+                }
+                else{
+                    this.setBackground(new Color(162,228,184)); // Pink background
+                    g2.setColor(robotColor);
+                    if (x == -1 || y == -1) {
+                         x = 625; // Center the robot if not set (625, 260)
+                         y = 260;
+                    }
+                g2.fillRect(x, y, 40, 40); // robot body
+                if (this.isVisible) {
+                    drawPlantPackage(g, x, y);
+            
+                    
+                    
+                }
   
           // Eyes
           g2.setColor(Color.BLACK);
@@ -132,5 +139,34 @@ g2.fillOval(x + 17, y - 13, 6, 6);
     public void powerUP(){
         power=!power;
         repaint();
+    }
+    public void setVisible(boolean visible) {
+        this.isVisible =visible;
+        repaint();
+    }
+    public void drawPlantPackage(Graphics g, int robotX, int robotY) {
+        // Adjusted to be small and centered above robot
+        int plantX = robotX + 20;  // Centered horizontally
+        int plantY = robotY - 20;  // Slightly above robot
+    
+        // Stem
+        g.setColor(new Color(0, 100, 0));
+        g.fillRect(plantX + 5, plantY, 2, 10); // thin stem
+    
+        // Leaves
+        g.setColor(new Color(0, 150, 0));
+        g.fillOval(plantX, plantY - 5, 8, 5);
+        g.fillOval(plantX + 6, plantY - 3, 8, 5);
+    
+        // Flower center
+        g.setColor(Color.YELLOW);
+        g.fillOval(plantX + 3, plantY - 10, 5, 5);
+    
+        // Petals (very small)
+        g.setColor(Color.PINK);
+        g.fillOval(plantX + 3, plantY - 14, 5, 5); 
+        g.fillOval(plantX + 3, plantY - 6, 5, 5); 
+        g.fillOval(plantX - 1, plantY - 10, 5, 5); 
+        g.fillOval(plantX + 7, plantY - 10, 5, 5); 
     }
 }

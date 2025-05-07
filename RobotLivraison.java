@@ -1,6 +1,9 @@
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class RobotLivraison extends RobotConnecte {
@@ -10,6 +13,31 @@ public class RobotLivraison extends RobotConnecte {
     private boolean enLivraison;
     static final int ENERGIE_LIVRAISON=15;
     static final int ENERGIE_CHARGEMENT=5;
+    public Map<String, Point> cityPositions = new HashMap<>();
+    public void remplirPositions(){
+        // Initialisation des positions des villes
+        cityPositions.put("New York", new Point(25, 260));
+        cityPositions.put("Tokyo", new Point(175, 160));
+        cityPositions.put("Manilla", new Point(170, 465));
+            cityPositions.put("Cairo", new Point(325, 360));
+            cityPositions.put("Paris", new Point(475, 260));
+            cityPositions.put("Tunis", new Point(625, 260));
+        
+    }
+    public String getColisActuel() {
+        if(colisActuel==0) return "Aucun colis";
+        else return "Colis Chargé";
+    }
+    public String getDelivery() {
+        if(enLivraison==true) return "En livraison";
+        else return "Pas de livraison";
+    }
+    public void setDelivery(boolean enLivraison) {
+        this.enLivraison = enLivraison;
+    }
+    public void setColisActuel(int colisActuel) {
+        this.colisActuel = colisActuel;
+    }
     //Methodes
     public RobotLivraison(String id, int x, int y) throws RobotException{
         super(id, x, y, 0, 0);
@@ -19,6 +47,13 @@ public class RobotLivraison extends RobotConnecte {
     }
     @Override
     public ArrayList<String> effectuerTache(Réseau reseau,String destination) throws RobotException {
+        this.remplirPositions();
+        if(enLivraison==false){
+            this.ChargerColis(destination);
+        }
+        if(enLivraison==true){
+            this.FaireLivraison(cityPositions.get(destination).x, cityPositions.get(destination).y);
+        }
     if (!this.enMarche) throw new RobotException("Le robot doit être démarré.");
 
 
@@ -32,7 +67,7 @@ public class RobotLivraison extends RobotConnecte {
         throw new RobotException("Aucun chemin trouvé vers " + destination);
     }
 
-    System.out.println("Chemin optimal trouvé : " + chemin);
+    
 
     for (int i = 1; i < chemin.size(); i++) {
         String from = chemin.get(i - 1);
@@ -50,6 +85,7 @@ public class RobotLivraison extends RobotConnecte {
                 if (!verifierEnergie(energieRequise)) {
                     throw new RobotException("Pas assez d'énergie pour aller de " + from + " à " + to);
                 }
+                
 
                 cosommerEnergie(energieRequise);
                 ajouterHistorique("Déplacement de " + from + " à " + to + " (énergie consommée: " + energieRequise + ")");
@@ -96,6 +132,7 @@ public class RobotLivraison extends RobotConnecte {
     public void ChargerColis(String destination) throws RobotException{
         if(enLivraison==false && colisActuel==0 && verifierEnergie(this.ENERGIE_CHARGEMENT)){
             colisActuel=1;
+            enLivraison=true;
             this.cosommerEnergie(this.ENERGIE_CHARGEMENT);
             this.ajouterHistorique("Colis charge a:"+destination);
         }
