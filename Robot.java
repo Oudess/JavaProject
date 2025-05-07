@@ -40,7 +40,7 @@ public abstract class Robot {
         throw new EnergieInsuffisanteException();
     }
     public boolean verifierMaintenance() throws MaintenanceRequiseException{
-        if (heuresUtilisation<100)
+        if (heuresUtilisation<200)
         return true;
         else 
         throw new MaintenanceRequiseException();
@@ -59,19 +59,25 @@ public abstract class Robot {
         this.enMarche=false;
         this.ajouterHistorique("Robot arreté");
     }
-    public void cosommerEnergie(int quantity){
-        if (this.energie<quantity){
+    public void cosommerEnergie(int quantity) throws EnergieInsuffisanteException{
+        if (this.energie>quantity){
         this.ajouterHistorique("Energie conseommé: "+quantity+" %");
         this.energie-=quantity;}
+        else{
+            throw new EnergieInsuffisanteException();
+        }
     }
     public void recharger(int quantity){
         if (this.energie+quantity<=100){
             this.ajouterHistorique("Energie rechargé: "+quantity+" %");
             this.energie+=quantity;
+        }else{
+            this.ajouterHistorique("Energie rechargé: "+(100-this.energie)+" %");
+            this.energie=100;
         }
     }
     public abstract void deplacer(int x,int y) throws RobotException;
-    public abstract void effectuerTache(Réseau reseau) throws RobotException;
+    public abstract ArrayList<String> effectuerTache(Réseau reseau,String destination) throws RobotException;
     public String getHistorique(){
         String Historique=String.join("\n",this.historiqueActions);
         return Historique;
@@ -80,6 +86,9 @@ public abstract class Robot {
     public String toString() {
         // TODO Auto-generated method stub
         return "RobotIndustriel [ID : "+this.id+", Position : ("+this.x+","+this.y+"), Énergie : "+this.energie+"%, Heures : "+this.heuresUtilisation+"]";
+    }
+    public boolean getEtat(){
+        return this.enMarche;
     }
 
 

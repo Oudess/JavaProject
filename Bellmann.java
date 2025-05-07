@@ -1,9 +1,8 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class Bellmann {
-    public static List<String> cheminBellman(Réseau r, String origine, String destination) {
+    public static ArrayList<String> cheminBellman(Réseau r, String origine, String destination) {
     int n = Ligne.nbstation;
     double[] dist = new double[n];
     String[] pred = new String[n];
@@ -23,7 +22,7 @@ public class Bellmann {
         }
     }
 
-    List<String> chemin = new ArrayList<String>();
+    ArrayList<String> chemin = new ArrayList<String>();
     String courant = destination;
     while (courant != null) {
         chemin.add(0, courant); // ajoute en tête pour inverser

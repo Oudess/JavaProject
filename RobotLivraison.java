@@ -1,6 +1,6 @@
 
-import java.util.List;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class RobotLivraison extends RobotConnecte {
@@ -18,18 +18,16 @@ public class RobotLivraison extends RobotConnecte {
         this.enLivraison=false;
     }
     @Override
-    public void effectuerTache(Réseau reseau) throws RobotException {
+    public ArrayList<String> effectuerTache(Réseau reseau,String destination) throws RobotException {
     if (!this.enMarche) throw new RobotException("Le robot doit être démarré.");
 
-    Scanner scanner = new Scanner(System.in);
-    System.out.println("Entrez la destination (ex: Paris, Tokyo, ...): ");
-    String destination = scanner.nextLine();
 
-    if (Ligne.contains(destination) == 0) {
-        throw new RobotException("Destination inconnue dans le réseau !");
-    }
 
-    List<String> chemin = reseau.plusCourtChemin("Tunis", destination);;
+   if (Ligne.contains(destination) == 0) {
+       throw new RobotException("Destination inconnue dans le réseau !");
+   }
+
+    ArrayList<String> chemin = Bellmann.cheminBellman(reseau, destination, "Tunis");
     if (chemin.isEmpty()) {
         throw new RobotException("Aucun chemin trouvé vers " + destination);
     }
@@ -58,7 +56,10 @@ public class RobotLivraison extends RobotConnecte {
                 break;
             }
         }
+        
     }
+    Collections.reverse(chemin); // Inverser le chemin pour le retour
+    return chemin;
 
     
 }
@@ -75,11 +76,11 @@ public class RobotLivraison extends RobotConnecte {
     @Override
     public void deplacer(int x, int y) throws RobotException{
         double distance = Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
-        if(distance>100){
+        if(distance>1000){
                 throw new RobotException("Distance tres importante!");
             }
         else{
-            int energieNess=(int)(distance/0.3);
+            int energieNess=(int)(distance/10);
             int heures=(int)(distance/10);
             if(verifierEnergie(energieNess)){
                 this.cosommerEnergie(energieNess);

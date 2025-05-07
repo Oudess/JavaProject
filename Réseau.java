@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 
 public class Réseau{
     public Ligne[] Tab_line;
@@ -54,7 +53,7 @@ public class Réseau{
         }
         return -1;
     }
-    public List<String> plusCourtChemin(String depart, String arrivee) {
+    public ArrayList<String> plusCourtChemin(String depart, String arrivee) {
     int n = Ligne.nbstation;
     double[] dist = new double[n];
     String[] pred = new String[n];
@@ -87,7 +86,7 @@ public class Réseau{
     }
 
     // Reconstruction du chemin
-    List<String> chemin = new ArrayList<>();
+    ArrayList<String> chemin = new ArrayList<>();
     String current = arrivee;
     while (current != null && !current.equals(depart)) {
         chemin.add(0, current);

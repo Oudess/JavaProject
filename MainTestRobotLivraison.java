@@ -1,7 +1,11 @@
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 
 public class MainTestRobotLivraison {
@@ -10,14 +14,20 @@ public class MainTestRobotLivraison {
         try {
             // Étape 1 : Créer le réseau
             Réseau reseau = new Réseau();
-            reseau.add_line("Tunis", "Paris", 4.5);
-            reseau.add_line("Paris", "Tokyo", 6.2);
-            reseau.add_line("Tunis", "Cairo", 3.0);
-            reseau.add_line("Cairo", "Tokyo", 5.5);
-            reseau.add_line("Tokyo", "New York", 8.1);
-            reseau.add_line("Cairo", "Manilla", 7.2);
-            reseau.add_line("Paris", "New York", 7.9);
-            reseau.add_line("Manilla", "New York", 4.3);
+            reseau.add_line("New York", "Tokyo", 4.8);
+        reseau.add_line("New York", "Manilla", 2);
+        reseau.add_line("Tokyo", "Paris", 10.12);
+        reseau.add_line("Tokyo", "Manilla", 5);
+        reseau.add_line("Manilla", "Cairo", 3.58);
+        reseau.add_line("Cairo", "Paris", 4);
+        reseau.add_line("Paris", "Tunis", 11);
+            Map<String, Point> cityPositions = new HashMap<>();
+            cityPositions.put("New York", new Point(25, 260));
+            cityPositions.put("Tokyo", new Point(175, 160));
+            cityPositions.put("Manilla", new Point(170, 465));
+            cityPositions.put("Cairo", new Point(325, 360));
+            cityPositions.put("Paris", new Point(475, 260));
+            cityPositions.put("Tunis", new Point(625, 260));
             
             
 
@@ -34,9 +44,8 @@ public class MainTestRobotLivraison {
             ImageIcon icon = new ImageIcon("icon.jpg");
             frame.setIconImage(icon.getImage());
             
-            JTextArea screen = new JTextArea();
-            screen.setEditable(false);
-            screen.setBackground(Color.LIGHT_GRAY);
+            Screen screen = new Screen();
+            screen.setBackground(new Color(162,228,184));//(170,219,30)
             screen.setBorder(BorderFactory.createTitledBorder("Screen"));
             frame.add(screen, BorderLayout.CENTER);  
             
@@ -93,6 +102,33 @@ public class MainTestRobotLivraison {
             JButton send = new JButton("Send ⌲");
             JButton returnButton = new JButton("Return");
             JButton doTask = new JButton("Do Task");
+            doTask.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(robot.getEtat()){
+                        
+                        try {
+                            ArrayList<String> chemin=robot.effectuerTache(reseau, input.getText());
+                            output.setText("Shortest path from Tunis:"+chemin+"\n");
+                            for(String city : chemin) {
+                                Point point = cityPositions.get(city);
+                                if (point != null) {
+                                    output.setText("Moving to: " + city + "\n");
+                                    TimeUnit.SECONDS.sleep(2);
+                                    screen.setPosition(point);
+                                    
+                                } else {
+                                    output.setText("City not found: " + city + "\n");
+                                }
+                            }
+                        } catch (Exception ex) {
+                            output.setText("Erreur de livraison : " + ex.getMessage() + "\n");
+                        }
+                    }else{
+                        output.setText("Robot is not powered up!\n");
+                    }
+                }
+            });
             
             gbc.gridy++;
             rightPanel.add(connect, gbc);
@@ -115,32 +151,164 @@ public class MainTestRobotLivraison {
             JPanel destinationsPanel = new JPanel(new GridLayout(3, 2, 5, 5));
             destinationsPanel.setBorder(BorderFactory.createTitledBorder("Destinations"));
             String[] cities = new String[]{"Paris", "Tokyo", "New York", "Tunis", "Cairo", "Manilla"};
-    
+            
             for(String city : cities) {
                 JButton button = new JButton(city);
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                       robot.setDestination(button.getText());    
+                       if(robot.getEtat()){
+                        robot.setDestination(button.getText());
+                       input.setText(button.getText());
+                       output.setText("Destination set to: " + button.getText() + "\n");
+                       }else{
+                           output.setText("Robot is not powered up!\n");
+                       }
+                           
                     }
                 });
                 destinationsPanel.add(button);
             }
+            send.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        if(robot.getEtat()){
+                        robot.envoyerDonnees(input.getText());
+                        output.setText("Data sent successfully!");}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                    } catch (RobotException e1) {
+                        // TODO Auto-generated catch block
+                        output.setText(e1.getMessage());
+                    }
+
+                }
+            });
     
             JPanel statusPanel = new JPanel();
-            statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));  
+            statusPanel.setLayout(new GridLayout(2,2, 5, 5));  
             statusPanel.setBorder(BorderFactory.createTitledBorder("Status"));
-            JTextArea pkgArea = new JTextArea(3, 10);
+            JTextArea pkgArea = new JTextArea(3, 5);
             pkgArea.setBorder(BorderFactory.createTitledBorder("Package:"));
             pkgArea.setEditable(false);
-            JTextArea delArea = new JTextArea(3, 10);
+            JTextArea delArea = new JTextArea(3, 5);
             delArea.setBorder(BorderFactory.createTitledBorder("Delivery:"));
             delArea.setEditable(false);
+            JTextArea BatteryArea = new JTextArea(3, 5);
+            BatteryArea.setBorder(BorderFactory.createTitledBorder("Battery:"));
+            BatteryArea.setEditable(false);
+            JTextArea PositionArea = new JTextArea(3, 5);
+            PositionArea.setBorder(BorderFactory.createTitledBorder("Position:"));
+            PositionArea.setEditable(false);
             statusPanel.add(pkgArea);
             statusPanel.add(delArea);
+            statusPanel.add(BatteryArea);
+            statusPanel.add(PositionArea);
             midPanel.add(destinationsPanel);
             midPanel.add(statusPanel);
             rightPanel.add(midPanel, gbc);
+            left.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    
+                 
+
+                    try {
+                        if(robot.getEtat()){
+                        robot.cosommerEnergie(5);
+                        PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
+                        BatteryArea.setText(robot.energie+"%");
+                        screen.deplacer(-10, 0);}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                    } catch (EnergieInsuffisanteException ex) {
+                        output.setText("Erreur de déplacement : " + ex.getMessage() + "\n");
+                    }
+                 
+                    
+            }});
+            right.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    
+                 
+                    try {
+                        if(robot.getEtat()){
+                        robot.cosommerEnergie(5);
+                        PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
+                        BatteryArea.setText(robot.energie+"%");
+                        screen.deplacer(10, 0);}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                    
+                    } catch (EnergieInsuffisanteException ex) {
+                        output.setText("Erreur de déplacement : " + ex.getMessage() + "\n");
+                    }
+                 
+            }});
+            up.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    
+                 
+                    try {
+                        if(robot.getEtat()){
+                        screen.deplacer(0, -10);
+                        PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
+                        BatteryArea.setText(robot.energie+"%");
+                        robot.cosommerEnergie(5);}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                } catch (EnergieInsuffisanteException ex) {
+                
+                    output.setText("Erreur de déplacement : " + ex.getMessage() + "\n");
+                } 
+            }});
+            down.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    
+                 
+                    try {
+                        if(robot.getEtat()){
+                        robot.cosommerEnergie(5);
+                        PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
+                        BatteryArea.setText(robot.energie+"%");
+                        screen.deplacer(0, 10);}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                    } catch (EnergieInsuffisanteException ex) {
+                        output.setText("Erreur de déplacement : " + ex.getMessage() + "\n");
+                    }
+                 
+                    
+            }});
+            returnButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    
+                    try {
+                        if(robot.getEtat()){
+                        screen.setPosition(new Point(625, 260));
+                        robot.setDestination("Tunis");
+                        PositionArea.setText("Position: ("+screen.x+","+screen.y+")");
+                        BatteryArea.setText(robot.energie+"%");
+                        robot.deplacer(625, 260);}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                    } catch (RobotException ex) {
+                        output.setText("Erreur de retour : " + ex.getMessage() + "\n");
+                    }
+                }
+            });
+    
             
             gbc.gridy++;
             JPanel bottomButtons = new JPanel(new GridLayout(1, 5, 5, 5));
@@ -149,40 +317,75 @@ public class MainTestRobotLivraison {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                                 // Étape 5 : Affichage de l'état final
-
-                   output.setText("--- Résumé ---\n"+robot.toString()+"\nHistorique des actions :"+robot.getHistorique());  
+                    if(robot.getEtat()){
+                        output.setText("--- Résumé ---\n"+robot.toString()+"\nHistorique des actions :"+robot.getHistorique());}
+                    else{
+                        output.setText("Robot is not powered up!\n");
+                    }
                 }
             });
             JButton battery = new JButton("⚡");
             battery.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                   robot.recharger(100);    
-                }
+                    
+                   robot.recharger(25); 
+                   BatteryArea.setText( robot.energie + "%");  }
+                    
             });
             JButton searchButton = new JButton("⌕");
             JButton heartButton = new JButton("♥");
             JButton powerButton = new JButton("⏻");
+            searchButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        if(robot.getEtat())
+                        Desktop.getDesktop().browse(URI.create("file:///C:/Users/MSI/Desktop/project/JavaProject.html"));
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
+                    } catch (Exception ex) {
+                        output.setText("Erreur d'ouverture du lien : " + ex.getMessage() + "\n");
+                    }
+                    
+                }
+            });
             powerButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e){
                     
                    try{
-                   robot.demarrer();}
-                   catch(RobotException er){
-                    //handling error
+                    if(robot.getEtat() == true){
+                        robot.arreter();
+                        output.setText("");
+                        output.setText("Robot arrêté\n");}
+                    else{
+                        robot.demarrer();
+                        output.setText("");
+                        output.setText("Robot démarré\n");
+                        
+                    }
+                    screen.powerUP();
+                    }catch(RobotException er){
+                        output.setText("");
+                        output.setText("Erreur de démarrage : " + er.getMessage() + "\n");
+                    }
 
                    }
 
-                }
-            });
+                });
             connect.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
+                        if(robot.getEtat()){
                         robot.connecter("reseau1");
                         output.setText("Robot connecté au réseau : reseau1\n");
-                        System.out.println("Connect button clicked");
+                        System.out.println("Connect button clicked");}
+                        else{
+                            output.setText("Robot is not powered up!\n");
+                        }
                     } catch (RobotException ex) {
                         output.setText("Erreur de connexion : " + ex.getMessage() + "\n");
                     }
@@ -191,8 +394,31 @@ public class MainTestRobotLivraison {
             disconnect.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    if(robot.getEtat()){
                         robot.deconnecter();
-                        output.append("Robot déconnecté au réseau : reseau1\n"); 
+                        output.setText("");
+                        output.setText("Robot déconnecté\n");}
+                    else{
+                        output.setText("Robot is not powered up!\n");
+                    } 
+                }
+            });
+            heartButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(robot.getEtat()){
+                        robot.ajouterHistorique("Robot en mode cœur !");
+                        
+                        screen.setHeart();
+                        output.setForeground(Color.RED);
+                        output.setText("❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️\n");}
+                    else{
+                        output.setText("Robot is not powered up!\n");
+                    }
+                
+
+                    
+                    
                 }
             });
             bottomButtons.add(history);
@@ -204,16 +430,7 @@ public class MainTestRobotLivraison {
             
             frame.setLocationRelativeTo(null);  
             frame.setVisible(true);
-            List<String> chemin = Bellmann.cheminBellman(reseau, "Paris", "New York");
-            System.out.println("Chemin calculé : " + chemin);
-            for (String ville : chemin) {
-            int x = Math.abs(ville.hashCode() % 20);
-            int y = Math.abs(ville.hashCode() % 20);
-            
-            robot.setDestination(ville);
-            robot.FaireLivraison(x, y);
-            
-            }
+           
             
         } catch (RobotException e) {
             System.err.println("Erreur Robot : " + e.getMessage());
