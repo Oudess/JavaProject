@@ -368,7 +368,7 @@ public class MainTestRobotLivraison {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if(robot.getEtat())
-                        Desktop.getDesktop().browse(URI.create("file:///C:/Users/MSI/Desktop/project/Java%20Project.pdf"));
+                        Desktop.getDesktop().browse(URI.create("file:///C:/Users/MSI/Desktop/Projet%20Java/project/Java%20Project.pdf"));
                         else{
                             output.setText("Robot is not powered up!\n");
                         }
